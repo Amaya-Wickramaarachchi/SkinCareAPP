@@ -1,240 +1,248 @@
-// Update at the top of app.js
-// Replace with your actual Supabase URL and anon key from your project settings
-const SUPABASE_URL = 'https://rgdftwpfyzqxsqoszped.supabase.co';
-const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJnZGZ0d3BmeXpxeHNxb3N6cGVkIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDIxNDQ3OTAsImV4cCI6MjA1NzcyMDc5MH0.MkE9Xwu9cODqsFEgIyoYPF4YTjU_Pp17vsY63Va5p3o';
-const supabase = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+document.addEventListener('DOMContentLoaded', () => {
+    console.log('DOM fully loaded and parsed');
 
-// Add authentication functions
-async function signUp(email, password) {
-    try {
-        const { user, error } = await supabase.auth.signUp({
-            email,
-            password,
+    // Initialize Supabase (replace with your Supabase URL and API key)
+    const SUPABASE_URL = 'https://rgdftwpfyzqxsqoszped.supabase.co';
+    const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJnZGZ0d3BmeXpxeHNxb3N6cGVkIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDIxNDQ3OTAsImV4cCI6MjA1NzcyMDc5MH0.MkE9Xwu9cODqsFEgIyoYPF4YTjU_Pp17vsY63Va5p3o';
+    
+    // Using the global supabase object correctly
+    const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+    // Add this function after initializing supabaseClient
+async function initializeAuth() {
+  // Check if user is already authenticated
+  const { data: { session } } = await supabaseClient.auth.getSession();
+  
+  if (!session) {
+    // If not authenticated, sign in anonymously (for development purposes)
+    const { data, error } = await supabaseClient.auth.signInAnonymously();
+    if (error) {
+      console.error("Authentication error:", error);
+      alert("Error with authentication. Some features may not work.");
+      return false;
+    } else {
+      console.log("Authenticated successfully");
+      return true;
+    }
+  } else {
+    console.log("Already authenticated");
+    return true;
+  }
+}
+
+    // DOM Elements
+    const tabs = document.querySelectorAll('nav a');
+    const tabContents = document.querySelectorAll('.tab-content');
+    const addProductBtn = document.getElementById('add-product-btn');
+    const productModal = document.getElementById('product-modal');
+    const closeModal = document.querySelector('.close');
+    const productForm = document.getElementById('product-form');
+    const productList = document.getElementById('product-list');
+    const routineTypes = document.querySelectorAll('.routine-type');
+    const routineContainer = document.getElementById('routine-container');
+    const addRoutineBtn = document.getElementById('add-routine-btn');
+    const addPhotoBtn = document.getElementById('add-photo-btn');
+    const progressTimeline = document.getElementById('progress-timeline');
+
+    // Debugging: Log elements to ensure they are correctly selected
+    console.log('Tabs:', tabs);
+    console.log('Add Product Button:', addProductBtn);
+    console.log('Product Modal:', productModal);
+    console.log('Close Modal:', closeModal);
+    console.log('Product Form:', productForm);
+
+    // Event Listeners
+
+    // Tab Navigation
+    tabs.forEach(tab => {
+        tab.addEventListener('click', (e) => {
+            e.preventDefault();
+            const targetTab = tab.getAttribute('data-tab');
+            console.log('Tab clicked:', targetTab);
+
+            // Remove active class from all tabs and contents
+            tabs.forEach(t => t.classList.remove('active'));
+            tabContents.forEach(content => content.classList.remove('active'));
+
+            // Add active class to the clicked tab and corresponding content
+            tab.classList.add('active');
+            document.getElementById(targetTab).classList.add('active');
         });
-        
-        if (error) throw error;
-        return user;
-    } catch (error) {
-        console.error('Error signing up:', error.message);
-        throw error;
-    }
-}
+    });
 
-async function signIn(email, password) {
-    try {
-        const { user, error } = await supabase.auth.signInWithPassword({
-            email,
-            password,
+    // Open Product Modal
+    if (addProductBtn) {
+        addProductBtn.addEventListener('click', () => {
+            console.log('Add Product Button clicked');
+            productModal.style.display = 'block';
         });
-        
-        if (error) throw error;
-        currentUser = user;
-        return user;
-    } catch (error) {
-        console.error('Error signing in:', error.message);
-        throw error;
+    } else {
+        console.error('Add Product Button not found');
     }
-}
 
-async function signOut() {
-    try {
-        const { error } = await supabase.auth.signOut();
-        if (error) throw error;
-        currentUser = null;
-    } catch (error) {
-        console.error('Error signing out:', error.message);
-        throw error;
+    // Close Product Modal
+    if (closeModal) {
+        closeModal.addEventListener('click', () => {
+            console.log('Close Modal clicked');
+            productModal.style.display = 'none';
+        });
+    } else {
+        console.error('Close Modal button not found');
     }
-}
 
-// Update your CRUD operations to use Supabase
-async function fetchProducts() {
-    try {
-        const { data, error } = await supabase
-            .from('products')
-            .select('*')
-            .order('created_at', { ascending: false });
-        
-        if (error) throw error;
-        products = data;
-        renderProducts();
-        renderDashboard();
-    } catch (error) {
-        console.error('Error fetching products:', error.message);
-        // Fall back to local storage
-        loadFromLocalStorage();
-    }
-}
+    // Also close modal when clicking outside of it
+    window.addEventListener('click', (e) => {
+        if (e.target === productModal) {
+            productModal.style.display = 'none';
+        }
+    });
 
-async function addProductToSupabase(product) {
-    try {
-        const { data, error } = await supabase
-            .from('products')
-            .insert([
-                {
-                    name: product.name,
-                    brand: product.brand,
-                    category: product.category,
-                    purchase_date: product.purchaseDate,
-                    notes: product.notes
+    // Handle Product Form Submission
+    if (productForm) {
+        productForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            console.log('Product Form submitted');
+
+            const productName = document.getElementById('product-name').value;
+            const productBrand = document.getElementById('product-brand').value;
+            const productCategory = document.getElementById('product-category').value;
+            const productDate = document.getElementById('product-date').value;
+            const productNotes = document.getElementById('product-notes').value;
+
+            try {
+                // Save product to Supabase
+                const { data, error } = await supabaseClient
+                    .from('products')
+                    .insert([{ 
+                        name: productName, 
+                        brand: productBrand, 
+                        category: productCategory, 
+                        purchase_date: productDate, 
+                        notes: productNotes 
+                    }]);
+
+                if (error) {
+                    console.error('Error saving product:', error);
+                    alert('Error saving product: ' + error.message);
+                } else {
+                    console.log('Product saved:', data);
+                    productModal.style.display = 'none';
+                    productForm.reset();
+                    loadProducts();
                 }
-            ])
-            .select();
-        
-        if (error) throw error;
-        
-        // Update local state with the returned data
-        products.push(data[0]);
-        renderProducts();
-        renderDashboard();
-        return data[0];
-    } catch (error) {
-        console.error('Error adding product:', error.message);
-       // Fall back to local storage
-       products.push(product);
-       saveToLocalStorage();
-       renderProducts();
-       renderDashboard();
-       return product;
-   }
-}
+            } catch (err) {
+                console.error('Exception when saving product:', err);
+                alert('An error occurred while saving the product.');
+            }
+        });
+    } else {
+        console.error('Product Form not found');
+    }
 
-async function updateProductInSupabase(productId, updates) {
-   try {
-       const { data, error } = await supabase
-           .from('products')
-           .update(updates)
-           .eq('id', productId)
-           .select();
-       
-       if (error) throw error;
-       
-       // Update local state
-       const index = products.findIndex(p => p.id === productId);
-       if (index !== -1) {
-           products[index] = { ...products[index], ...updates };
-       }
-       
-       renderProducts();
-       renderDashboard();
-       return data[0];
-   } catch (error) {
-       console.error('Error updating product:', error.message);
-       // Fall back to local update
-       const index = products.findIndex(p => p.id === productId);
-       if (index !== -1) {
-           products[index] = { ...products[index], ...updates };
-           saveToLocalStorage();
-           renderProducts();
-           renderDashboard();
-       }
-   }
-}
+    // Load Products
+    async function loadProducts() {
+        try {
+            const { data, error } = await supabaseClient
+                .from('products')
+                .select('*');
 
-async function deleteProductFromSupabase(productId) {
-   try {
-       const { error } = await supabase
-           .from('products')
-           .delete()
-           .eq('id', productId);
-       
-       if (error) throw error;
-       
-       // Update local state
-       products = products.filter(p => p.id !== productId);
-       renderProducts();
-       renderDashboard();
-   } catch (error) {
-       console.error('Error deleting product:', error.message);
-       // Fall back to local delete
-       products = products.filter(p => p.id !== productId);
-       saveToLocalStorage();
-       renderProducts();
-       renderDashboard();
-   }
-}
+            if (error) {
+                console.error('Error loading products:', error);
+                productList.innerHTML = '<p class="empty-state">Error loading products. Please try again.</p>';
+            } else {
+                productList.innerHTML = ''; // Clear existing products
+                if (!data || data.length === 0) {
+                    productList.innerHTML = '<p class="empty-state">No products added yet. Add your first product!</p>';
+                } else {
+                    data.forEach(product => {
+                        const productCard = document.createElement('div');
+                        productCard.className = 'product-card';
+                        productCard.innerHTML = `
+                            <h3>${product.name}</h3>
+                            <p><strong>Brand:</strong> ${product.brand}</p>
+                            <p><strong>Category:</strong> ${product.category}</p>
+                            <p><strong>Date:</strong> ${product.purchase_date || 'Not specified'}</p>
+                            <p><strong>Notes:</strong> ${product.notes || 'None'}</p>
+                        `;
+                        productList.appendChild(productCard);
+                    });
+                }
+            }
+        } catch (err) {
+            console.error('Exception when loading products:', err);
+            productList.innerHTML = '<p class="empty-state">Error loading products. Please try again.</p>';
+        }
+    }
 
-// Update the addProduct function to use Supabase
-async function addProduct() {
-   const product = {
-       name: document.getElementById('product-name').value,
-       brand: document.getElementById('product-brand').value,
-       category: document.getElementById('product-category').value,
-       purchaseDate: document.getElementById('product-date').value,
-       notes: document.getElementById('product-notes').value,
-   };
-   
-   if (supabaseClient && currentUser) {
-       await addProductToSupabase(product);
-   } else {
-       // Fall back to local storage
-       product.id = Date.now().toString();
-       product.dateAdded = new Date().toISOString();
-       products.push(product);
-       saveToLocalStorage();
-       renderProducts();
-       renderDashboard();
-   }
-   
-   // Close modal and reset form
-   productModal.style.display = 'none';
-   productForm.reset();
-}
+    // Routine Type Selection
+    if (routineTypes && routineTypes.length > 0) {
+        routineTypes.forEach(type => {
+            type.addEventListener('click', () => {
+                routineTypes.forEach(t => t.classList.remove('active'));
+                type.classList.add('active');
+                const routineType = type.getAttribute('data-type');
+                console.log('Routine Type clicked:', routineType);
+                loadRoutines(routineType);
+            });
+        });
+    } else {
+        console.error('Routine Types not found');
+    }
 
-// Update the deleteProduct function to use Supabase
-function deleteProduct(productId) {
-   if (confirm('Are you sure you want to delete this product?')) {
-       if (supabaseClient && currentUser) {
-           deleteProductFromSupabase(productId);
-       } else {
-           // Fall back to local storage
-           products = products.filter(product => product.id !== productId);
-           saveToLocalStorage();
-           renderProducts();
-           renderDashboard();
-       }
-   }
-}
+    // Load Routines
+    async function loadRoutines(type) {
+        try {
+            const { data, error } = await supabaseClient
+                .from('routines')
+                .select('*')
+                .eq('type', type);
 
-// Add an initialization function to check authentication status
-async function initAuth() {
-   try {
-       const { data: { user } } = await supabase.auth.getUser();
-       if (user) {
-           currentUser = user;
-           document.body.classList.add('authenticated');
-           fetchProducts(); // Load data from Supabase
-       } else {
-           // Not logged in, show auth forms
-           document.body.classList.remove('authenticated');
-           showAuthForms();
-       }
-   } catch (error) {
-       console.error('Error checking auth status:', error.message);
-       // Fall back to local storage
-       loadFromLocalStorage();
-   }
-}
+            if (error) {
+                console.error('Error loading routines:', error);
+                routineContainer.innerHTML = '<p class="empty-state">Error loading routines. Please try again.</p>';
+            } else {
+                routineContainer.innerHTML = ''; // Clear existing routines
+                if (!data || data.length === 0) {
+                    routineContainer.innerHTML = '<p class="empty-state">No routines added yet. Build your first routine!</p>';
+                } else {
+                    data.forEach(routine => {
+                        const routineCard = document.createElement('div');
+                        routineCard.className = 'routine-card';
+                        routineCard.innerHTML = `
+                            <h3>${routine.name}</h3>
+                            <p><strong>Steps:</strong> ${routine.steps || 'No steps added'}</p>
+                        `;
+                        routineContainer.appendChild(routineCard);
+                    });
+                }
+            }
+        } catch (err) {
+            console.error('Exception when loading routines:', err);
+            routineContainer.innerHTML = '<p class="empty-state">Error loading routines. Please try again.</p>';
+        }
+    }
 
-// Update the initApp function to include auth initialization
-function initApp() {
-   try {
-       // Initialize Supabase client
-       supabaseClient = supabase;
-       console.log('Supabase client initialized');
-       
-       // Initialize authentication
-       initAuth();
-   } catch (error) {
-       console.error('Error initializing Supabase client:', error);
-       // Fall back to local storage
-       loadFromLocalStorage();
-       renderDashboard();
-       renderProducts();
-       renderRoutines('morning');
-       renderProgressPhotos();
-   }
-   
-   // Set up event listeners
-   setupEventListeners();
-}
+    // Add Routine
+    if (addRoutineBtn) {
+        addRoutineBtn.addEventListener('click', () => {
+            console.log('Add Routine Button clicked');
+            alert('Add Routine functionality coming soon!');
+        });
+    } else {
+        console.error('Add Routine Button not found');
+    }
+
+    // Add Progress Photo
+    if (addPhotoBtn) {
+        addPhotoBtn.addEventListener('click', () => {
+            console.log('Add Progress Photo Button clicked');
+            alert('Add Progress Photo functionality coming soon!');
+        });
+    } else {
+        console.error('Add Progress Photo Button not found');
+    }
+
+    // Initial Load
+    loadProducts();
+    loadRoutines('morning'); // Default to morning routine
+});
