@@ -12,13 +12,13 @@ jobs:
     steps:
     - uses: actions/checkout@v3
     
-    # Set up Node.js (for tools even though we don't have backend)
+    # Set up Node.js
     - name: Set up Node.js
       uses: actions/setup-node@v3
       with:
         node-version: '18'
     
-    # Cache node modules for faster installs
+    # Cache dependencies
     - name: Cache dependencies
       uses: actions/cache@v3
       with:
@@ -30,19 +30,19 @@ jobs:
     # Install dependencies
     - name: Install dependencies
       run: npm install
-    
-    # HTML validation
-    - name: Install html-validator
+
+    # HTML validation using npm package
+    - name: Validate HTML
       run: |
-        npm install -g html-validator-cli
-        npx html-validator --file=index.html --verbose
-    
+        npm install -g vnu-jar
+        java -jar ~/vnu.jar --skip-non-html index.html
+
     # CSS validation
     - name: Validate CSS
       run: |
         npm install -g css-validator
         css-validator style.css
-    
+
     # JavaScript linting
     - name: Lint JavaScript
       uses: github/super-linter@v4
@@ -50,20 +50,20 @@ jobs:
         VALIDATE_JAVASCRIPT_ES: true
         DEFAULT_BRANCH: main
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-    
-    # Security scanning (SAST)
+
+    # Security scanning
     - name: Run ESLint security audit
       run: npx eslint-plugin-security .
-    
-    # Dependency vulnerability scanning (SCA)
+
+    # Dependency vulnerability scanning
     - name: Audit npm packages
       run: npm audit
-    
-    # If audit finds critical vulnerabilities, fail the build
+
+    # Quality gate for vulnerabilities
     - name: Check for vulnerabilities
       if: ${{ failure() && steps.audit.outcome == 'failure' }}
       run: exit 1
-    
+
   deploy:
     needs: quality-checks
     runs-on: ubuntu-latest
