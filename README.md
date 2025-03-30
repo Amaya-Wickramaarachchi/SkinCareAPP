@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 # Simple Skincare Tracker
 
 A basic web application to track your daily skincare routine.
@@ -21,3 +22,18 @@ A basic web application to track your daily skincare routine.
 
 ## Deployment
 This app can be easily deployed to Vercel or any static hosting service.
+=======
+# Aura Skincare
+
+A simple skincare tracking application to help users monitor their skincare journey.
+
+## Features
+- Product inventory tracking
+- Daily routine logging
+- Progress photos
+- Skin concerns tracking
+
+## Technologies
+- HTML, CSS, JavaScript
+- Supabase for backend
+>>>>>>> origin/main

@@ -3,30 +3,30 @@
   "version": "1.0.0",
   "description": "A basic web application to track your daily skincare routine.",
   "main": "script.js",
-  "config": {
-    "commitizen": {
-      "path": "./node_modules/cz-conventional-changelog"
-    }
-  },
   "scripts": {
-    "commit": "git-cz"
-  "release": "standard-version"
-
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "commit": "git-cz",
+    "release": "standard-version"
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/Amaya-Wickramaarachchi/SkinCareAPP.git"
+    "url": "git+https://github.com/Amaya-Wickramaarachchi/SkinCareApp.git"
   },
   "keywords": [],
   "author": "",
   "license": "ISC",
   "bugs": {
-    "url": "https://github.com/Amaya-Wickramaarachchi/SkinCareAPP/issues"
+    "url": "https://github.com/Amaya-Wickramaarachchi/SkinCareApp/issues"
   },
-  "homepage": "https://github.com/Amaya-Wickramaarachchi/SkinCareAPP#readme",
+  "homepage": "https://github.com/Amaya-Wickramaarachchi/SkinCareApp#readme",
   "devDependencies": {
     "commitizen": "^4.3.1",
     "cz-conventional-changelog": "^3.3.0",
     "standard-version": "^9.5.0"
+  },
+  "config": {
+    "commitizen": {
+      "path": "./node_modules/cz-conventional-changelog"
+    }
   }
 }
