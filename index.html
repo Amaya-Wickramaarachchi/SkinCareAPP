@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Simple Skincare Tracker</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="container">
+        <h1>Skincare Tracker</h1>
+        
+        <div class="product-form">
+            <input type="text" id="product-name" placeholder="Enter product name">
+            <button id="add-product">Add Product</button>
+        </div>
+        
+        <div class="routine">
+            <h2>Morning Routine</h2>
+            <div id="am-products" class="product-list"></div>
+            
+            <h2>Evening Routine</h2>
+            <div id="pm-products" class="product-list"></div>
+        </div>
+        
+        <div class="history">
+            <h2>Usage History</h2>
+            <div id="history-list"></div>
+        </div>
+    </div>
+    
+    <script src="script.js"></script>
+</body>
+</html>
