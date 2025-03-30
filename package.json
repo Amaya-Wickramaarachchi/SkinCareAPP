@@ -1,0 +1,29 @@
+{
+  "name": "aura",
+  "version": "1.0.0",
+  "description": "A basic web application to track your daily skincare routine.",
+  "main": "script.js",
+  "config": {
+    "commitizen": {
+      "path": "./node_modules/cz-conventional-changelog"
+    }
+  },
+  "scripts": {
+    "commit": "git-cz"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Amaya-Wickramaarachchi/SkinCareAPP.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/Amaya-Wickramaarachchi/SkinCareAPP/issues"
+  },
+  "homepage": "https://github.com/Amaya-Wickramaarachchi/SkinCareAPP#readme",
+  "devDependencies": {
+    "commitizen": "^4.3.1",
+    "cz-conventional-changelog": "^3.3.0"
+  }
+}
