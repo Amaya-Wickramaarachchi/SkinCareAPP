@@ -32,10 +32,10 @@ jobs:
       run: npm install
     
     # HTML validation
-    - name: Validate HTML
-      uses: peaceiris/actions-html-validator@main
-      with:
-        file: index.html
+    - name: Install html-validator
+      run: |
+        npm install -g html-validator-cli
+        npx html-validator --file=index.html --verbose
     
     # CSS validation
     - name: Validate CSS
