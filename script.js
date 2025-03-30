@@ -69,6 +69,7 @@ function renderProducts() {
 
 // Mark product as used
 function markAsUsed(productId, time) {
+    console.log(`Marking product ${productId} as used at ${time}`);
     const product = skincareData.products.find(p => p.id == productId);
     if (product) {
         const timestamp = new Date().toISOString();

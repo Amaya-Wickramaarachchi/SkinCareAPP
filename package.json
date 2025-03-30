@@ -4,7 +4,7 @@
   "description": "A basic web application to track your daily skincare routine.",
   "main": "script.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
+    "test": "jest",
     "commit": "git-cz",
     "release": "standard-version"
   },
@@ -22,6 +22,7 @@
   "devDependencies": {
     "commitizen": "^4.3.1",
     "cz-conventional-changelog": "^3.3.0",
+    "jest": "^29.7.0",
     "standard-version": "^9.5.0"
   },
   "config": {

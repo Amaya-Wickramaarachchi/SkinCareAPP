@@ -1,0 +1,78 @@
+name: CI/CD Pipeline
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  quality-checks:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v3
+    
+    # Set up Node.js (for tools even though we don't have backend)
+    - name: Set up Node.js
+      uses: actions/setup-node@v3
+      with:
+        node-version: '18'
+    
+    # Cache node modules for faster installs
+    - name: Cache dependencies
+      uses: actions/cache@v3
+      with:
+        path: ~/.npm
+        key: ${{ runner.os }}-node-${{ hashFiles('**/package-lock.json') }}
+        restore-keys: |
+          ${{ runner.os }}-node-
+    
+    # Install dependencies
+    - name: Install dependencies
+      run: npm install
+    
+    # HTML validation
+    - name: Validate HTML
+      uses: peaceiris/actions-html-validator@main
+      with:
+        file: index.html
+    
+    # CSS validation
+    - name: Validate CSS
+      run: |
+        npm install -g css-validator
+        css-validator style.css
+    
+    # JavaScript linting
+    - name: Lint JavaScript
+      uses: github/super-linter@v4
+      env:
+        VALIDATE_JAVASCRIPT_ES: true
+        DEFAULT_BRANCH: main
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+    
+    # Security scanning (SAST)
+    - name: Run ESLint security audit
+      run: npx eslint-plugin-security .
+    
+    # Dependency vulnerability scanning (SCA)
+    - name: Audit npm packages
+      run: npm audit
+    
+    # If audit finds critical vulnerabilities, fail the build
+    - name: Check for vulnerabilities
+      if: ${{ failure() && steps.audit.outcome == 'failure' }}
+      run: exit 1
+    
+  deploy:
+    needs: quality-checks
+    runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/main'
+    steps:
+    - uses: actions/checkout@v3
+    - uses: amondnet/vercel-action@v25
+      with:
+        vercel-token: ${{ secrets.VERCEL_TOKEN }}
+        vercel-org-id: ${{ secrets.VERCEL_ORG_ID }}
+        vercel-project-id: ${{ secrets.VERCEL_PROJECT_ID }}
+        scope: ${{ secrets.VERCEL_ORG_ID }}
